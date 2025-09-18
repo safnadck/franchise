@@ -340,3 +340,28 @@ body {
   transition: background-color 0.3s ease;
 }
 
+/* Password container for eye icon */
+.password-container {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-container input {
+  flex: 1;
+  padding-right: 40px; /* space for icon */
+}
+
+.eye-icon {
+  position: absolute;
+  right: 15px;
+  cursor: pointer;
+  color: rgba(255,255,255,0.7);
+  font-size: 20px;
+  transition: color 0.2s ease;
+}
+
+.eye-icon:hover {
+  color: #fff;
+}
+

@@ -82,43 +82,45 @@
   
     <div class="table-wrapper">
       <table class="data-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Username</th>
-            <th>Email ID</th>
-            <th>Contact</th>
-           
-            <th>Actions</th> 
-          </tr>
-        </thead>
-       <tbody>
-  {% if users %}
-    {% for user in users %}
+  <colgroup>
+    <col style="width: 20%;"> <!-- Name -->
+    <col style="width: 20%;"> <!-- Username -->
+    <col style="width: 25%;"> <!-- Email -->
+    <col style="width: 20%;"> <!-- Contact -->
+    <col style="width: 15%;"> <!-- Actions -->
+  </colgroup>
+  <thead>
     <tr>
+      <th>Name</th>
+      <th>Username</th>
+      <th>Email ID</th>
+      <th>Contact</th>
+      <th>Actions</th> 
+    </tr>
+  </thead>
+  <tbody>
+    {% if users %}
+      {% for user in users %}
+      <tr>
         <td>{{ user.get_full_name|default:user.username }}</td>
         <td>{{ user.username }}</td>
         <td>{{ user.email }}</td>
+        <td>{{ user.profile.phone_number }}</td>
         <td>
-          {{ user.profile.phone_number }}
+          <a href="{% url 'application:student_detail' franchise.id batch.id user.id %}" class="manage-courses-btn">
+            View
+          </a>
         </td>
-        
-       <td>
-           <a href="{% url 'application:student_detail' franchise.id batch.id user.id %}" class="manage-courses-btn">
-  View
-</a>
+      </tr>
+      {% endfor %}
+    {% else %}
+      <tr>
+        <td colspan="5" class="no-data">No students enrolled in this course</td>
+      </tr>
+    {% endif %}
+  </tbody>
+</table>
 
-        </td> 
-    </tr>
-    {% endfor %}
-  {% else %}
-    <tr>
-      <td colspan="6" class="no-data">No students enrolled in this course</td>
-    </tr>
-  {% endif %}
-</tbody>
-
-      </table>
     </div>
   </main>
 <script>

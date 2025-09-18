@@ -105,7 +105,7 @@
         {% if franchise.registration_date %}
         <div class="detail-item">
           <span class="detail-label">Registration Date:</span>
-          <span class="detail-value">{{ franchise.registration_date }}</span>
+          <span class="detail-value">{{ franchise.registration_date|date:'d/m/Y' }}</span>
         </div>
         {% endif %}
       </div>

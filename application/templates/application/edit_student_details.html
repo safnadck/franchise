@@ -118,6 +118,20 @@
           {% endif %}
         </div>
 
+        <div class="form-group">
+          {{ form.new_password.label_tag }}
+          <div class="password-container">
+            {{ form.new_password }}
+            <span class="eye-icon" id="toggleNewPassword">
+                <span class="iconify" data-icon="mdi:eye-off" id="eye-off-new"></span>
+                <span class="iconify" data-icon="mdi:eye" id="eye-on-new" style="display:none;"></span>
+            </span>
+          </div>
+          {% if form.new_password.errors %}
+          <div class="error">{{ form.new_password.errors }}</div>
+          {% endif %}
+        </div>
+
         <div class="form-actions">
           <button type="submit">Update Student Details</button>
           <a href="{% url 'application:student_detail' franchise.id batch.id user.id %}" class="btn btn-secondary">Cancel</a>
@@ -140,6 +154,27 @@
   // Close dropdown when clicking outside
   document.addEventListener('click', function() {
     dropdownMenu.style.display = 'none';
+  });
+</script>
+
+<script>
+  const toggleNewPassword = document.querySelector('#toggleNewPassword');
+  const newPassword = document.querySelector('#new_password');
+  const eyeOffNew = document.querySelector('#eye-off-new');
+  const eyeOnNew = document.querySelector('#eye-on-new');
+
+  toggleNewPassword.addEventListener('click', function (e) {
+    // toggle the type attribute
+    const type = newPassword.getAttribute('type') === 'password' ? 'text' : 'password';
+    newPassword.setAttribute('type', type);
+    // toggle the eye icons
+    if (type === 'password') {
+      eyeOffNew.style.display = 'inline';
+      eyeOnNew.style.display = 'none';
+    } else {
+      eyeOffNew.style.display = 'none';
+      eyeOnNew.style.display = 'inline';
+    }
   });
 </script>
 

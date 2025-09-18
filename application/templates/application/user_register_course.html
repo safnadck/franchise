@@ -83,7 +83,14 @@
             <input type="text" name="mailing_address" placeholder="Address" value="{{ form.mailing_address.value|default_if_none:'' }}">
 
             <!-- Password -->
-            <input type="password" name="password" placeholder="Password">
+            <div class="password-container">
+                <input type="password" id="password" name="password" placeholder="Password">
+                <span class="eye-icon" id="togglePassword">
+                    <span class="iconify" data-icon="mdi:eye-off" id="eye-off"></span>
+                    <span class="iconify" data-icon="mdi:eye" id="eye-on" style="display:none;"></span>
+                </span>
+                
+            </div>
 
             <button type="submit">Register Student</button>
         </form>
@@ -102,6 +109,27 @@
   // Close dropdown when clicking outside
   document.addEventListener('click', function() {
     dropdownMenu.style.display = 'none';
+  });
+</script>
+
+<script>
+  const togglePassword = document.querySelector('#togglePassword');
+  const password = document.querySelector('#password');
+  const eyeOff = document.querySelector('#eye-off');
+  const eyeOn = document.querySelector('#eye-on');
+
+  togglePassword.addEventListener('click', function (e) {
+    // toggle the type attribute
+    const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+    password.setAttribute('type', type);
+    // toggle the eye icons
+    if (type === 'password') {
+      eyeOff.style.display = 'inline';
+      eyeOn.style.display = 'none';
+    } else {
+      eyeOff.style.display = 'none';
+      eyeOn.style.display = 'inline';
+    }
   });
 </script>
 

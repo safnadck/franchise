@@ -1,0 +1,158 @@
+
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fee Payment Reminders</title>
+    <link rel="stylesheet" href="{% static 'css/fee_reminders.css' %}">
+    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+</head>
+
+<body>
+
+    <!-- Navbar -->
+    <header class="navbar">
+        <a href="{% url 'application:homepage' %}" class="navbar-left">
+            <img src="{% static 'images/tutorlogo.png' %}" alt="Tutor Logo" class="brand-logo">
+        </a>
+
+        <div class="user-panel">
+            <span class="iconify profile" data-icon="iconamoon:profile-fill"></span>
+            <span class="user-name">{{ user.username }}</span>
+            <div class="dropdown-menu">
+                <a href="{% url 'logout' %}" class="logout-link">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="sidebar-menu">
+        <div class="menu-wrapper">
+
+        </div>
+        <div class="menu-item">
+            <a href="{% url 'application:franchise_list' %}" class="menu-link">
+                <span class="iconify menu-icon" data-icon="fa-solid:school"></span>
+                <span class="menu-text">Franchise</span>
+            </a>
+        </div>
+        <div class="menu-item">
+        <a href="" class="menu-link">
+          <span class="iconify menu-icon" data-icon="ic:sharp-library-books"></span>
+          <span class="menu-text">Courses</span>
+        </a>
+      </div>
+        <div class="menu-item">
+            <a href="{% url 'application:homepage' %}" class="menu-link">
+                <span class="iconify menu-icon" data-icon="iconoir:reports-solid"></span>
+                <span class="menu-text">Reports</span>
+            </a>
+        </div>
+        <div class="menu-item">
+            <a href="#" class="menu-link">
+                <span class="iconify menu-icon" data-icon="mdi:cog"></span>
+                <span class="menu-text">Settings</span>
+            </a>
+        </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="page-content">
+        <div class="register-wrapper">
+            <div class="left-buttons">
+                <a href="{% url 'application:homepage' %}" class="backbutton">
+                    <span class="iconify" data-icon="weui:back-filled" style="font-size: 20px;"></span>
+                </a>
+            </div>
+        </div>
+
+        <h1 class="page-heading">Fee Payment Reminders</h1>
+
+        <h2 class="section-heading">Students with Fees Due in Next 3 Days</h2>
+        <table class="fee-table">
+            <thead>
+                <tr>
+                    <th>Student Username</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Franchise</th>
+                    <th>Batch</th>
+                    <th>Due Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for installment in upcoming_installments %}
+                <tr>
+                    <td>{{ installment.student_fee_management.user_franchise.user.username }}</td>
+                    <td>{{ installment.student_fee_management.user_franchise.user.email }}</td>
+                    <td>{% if installment.student_fee_management.user_franchise.user.profile.phone_number %}{{ installment.student_fee_management.user_franchise.user.profile.phone_number }}{% else %}-{% endif %}</td>
+                    <td>{{ installment.student_fee_management.user_franchise.batch.franchise.name }}</td>
+                    <td>{{ installment.student_fee_management.user_franchise.batch.batch_no }}</td>
+                    <td>{{ installment.due_date }}</td>
+                    <td>{{ installment.amount }}</td>
+                    <td>{{ installment.status }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8">No upcoming fee payments in next 3 days.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <h2 class="section-heading" style="margin-top: 34px;">Students with Overdue Fees</h2>
+        <table class="fee-table">
+            <thead>
+                <tr>
+                    <th>Student Username</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Franchise</th>
+                    <th>Batch</th>
+                    <th>Due Date</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Unenroll</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in overdue_data %}
+                <tr>
+                    <td>{{ item.installment.student_fee_management.user_franchise.user.username }}</td>
+                    <td>{{ item.installment.student_fee_management.user_franchise.user.email }}</td>
+                    <td>{% if item.installment.student_fee_management.user_franchise.user.profile.phone_number %}{{ item.installment.student_fee_management.user_franchise.user.profile.phone_number }}{% else %}-{% endif %}</td>
+                    <td>{{ item.installment.student_fee_management.user_franchise.batch.franchise.name }}</td>
+                    <td>{{ item.installment.student_fee_management.user_franchise.batch.batch_no }}</td>
+                    <td>{{ item.installment.due_date }}</td>
+                    <td>{{ item.installment.amount }}</td>
+                    <td>{{ item.installment.status }}</td>
+                    <td>
+                        {% if item.is_enrolled %}
+                        <form method="post" action="{% url 'application:fee_reminders' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="installment_id" value="{{ item.installment.id }}">
+                            <button type="submit" class="btn-secondary btn-small" onclick="return confirm('Are you sure you want to unenroll this student from the course?');">Unenroll</button>
+                        </form>
+                        {% else %}
+                        <span>Unenrolled</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9">No overdue fee payments.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </main>
+</body>
+</html>
+
