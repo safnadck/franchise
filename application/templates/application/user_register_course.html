@@ -33,9 +33,9 @@
             </a>
         </div>
         <div class="menu-item">
-        <a href="" class="menu-link">
-          <span class="iconify menu-icon" data-icon="ic:sharp-library-books"></span>
-          <span class="menu-text">Courses</span>
+        <a href="{% url 'application:receipt_search' %}" class="menu-link">
+          <span class="iconify menu-icon" data-icon="fluent:reciept-24-filled"></span>
+          <span class="menu-text">Reciept</span>
         </a>
       </div>
         <div class="menu-item">
@@ -44,12 +44,12 @@
                 <span class="menu-text">Reports</span>
             </a>
         </div>
-        <div class="menu-item">
+        <!-- <div class="menu-item">
             <a href="#" class="menu-link">
                 <span class="iconify menu-icon" data-icon="mdi:cog"></span>
                 <span class="menu-text">Settings</span>
             </a>
-        </div>
+        </div> -->
     </div>
 </aside>
 
@@ -70,8 +70,8 @@
             <!-- Full Name -->
             <input type="text" name="full_name" placeholder="Full Name" value="{{ form.full_name.value|default_if_none:'' }}">
 
-            <!-- Username -->
-            <input type="text" name="username" placeholder="Username" value="{{ form.username.value|default_if_none:'' }}">
+            <!-- Username (automatically generated from registration number) -->
+            <input type="hidden" name="username" value="{{ form.username.value|default_if_none:'temp_username' }}">
 
             <!-- Email -->
             <input type="email" name="email" placeholder="Email" value="{{ form.email.value|default_if_none:'' }}">

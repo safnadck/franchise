@@ -186,104 +186,73 @@ body {
   margin-left: 250px;
 }
 
+/* ---------- Main Content ---------- */
+.page-content {
+  margin-left: 80px;
+  margin-top: 70px; /* below navbar */
+  padding: 2rem;
+  min-height: calc(100vh - 70px);
+  background: #ffffff;
+  transition: margin-left 0.3s ease;
+}
 
+.sidebar-menu:hover ~ .page-content {
+  margin-left: 250px;
+}
 
-/* Stats Section */
+/* Welcome text */
+.page-content .content p {
+  font-size: 18px;
+  font-weight: 500;
+  color: #16376D;
+  margin-bottom: 2rem;
+}
+
+/* Stats section */
 .stats {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); 
-  grid-template-rows: auto auto; 
-  gap: 2rem;
-  justify-items: center; 
-  align-items: stretch;
+  grid-template-columns: repeat(2, 1fr); /* Always 2 columns */
+  gap: 2rem; /* bigger gap for wide screens */
+  width: 90%;  /* take most of the screen */
+  max-width: 1400px; /* optional, prevent too extreme stretching */
+  margin: 0 auto; /* center in screen */
 }
 
-.stats .stat-box,
-.stats .stat-box-link .stat-box {
-  width: 800px; 
-  max-width: 90vw; 
-}
 
+/* Stat box */
 .stat-box-link {
   text-decoration: none;
 }
 
-.stats .stat-box:last-child {
-  grid-column: 1 / span 2;
-}
-
-
-
 .stat-box {
   background: white;
-  border-radius: 14px;
-  padding: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
   text-align: center;
-  flex: 1;
-  transition: transform 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .stat-box:hover {
   transform: translateY(-5px);
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12);
 }
 
-
 .stat-box i {
-  font-size: 2.5rem;
+  font-size: 36px;
   color: #16376D;
-  margin-bottom: 1rem;
+  margin-bottom: 10px;
 }
 
 .stat-box h2 {
-  font-size: 2.5rem;
-  color: #16376D;
-  margin-bottom: 0.5rem;
+  font-size: 28px;
   font-weight: 700;
+  margin-bottom: 5px;
+  color: #222;
 }
 
 .stat-box p {
-  color: #666;
-  font-size: 1.1rem;
-  margin: 0;
-}
-
-.content {
-  padding: 2rem;
-}
-
-.content h1 {
-  color: #333;
-  margin-bottom: 1rem;
-}
-
-.content p {
-  color: #666;
-  line-height: 1.6;
-  margin-bottom: 2rem;
-}
-
-/* Responsive */
-@media screen and (max-width: 768px) {
-  .page-content {
-    margin-left: 80px;
-    padding: 1rem;
-  }
-
-  .data-table {
-    font-size: 14px;
-  }
-
-  .data-table thead th,
-  .data-table tbody td {
-    padding: 0.75rem;
-  }
-
-  .stats {
-    flex-direction: column;
-  }
-
-  .stat-box {
-    min-width: 100%;
-  }
+  font-size: 15px;
+  font-weight: 500;
+  color: #555;
 }

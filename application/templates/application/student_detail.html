@@ -17,7 +17,7 @@
 
    <div class="user-panel">
   <span class="iconify profile" data-icon="iconamoon:profile-fill"></span>
-  <span class="user-name">{{ user.username }}</span>
+  <span class="user-name">Admin</span>
 
   <div class="dropdown-menu">
     <a href="{% url 'logout' %}" class="logout-link">Logout</a>
@@ -33,10 +33,10 @@
           <span class="menu-text">Franchise</span>
         </a>
       </div>
-      <div class="menu-item">
-        <a href="" class="menu-link">
-          <span class="iconify menu-icon" data-icon="ic:sharp-library-books"></span>
-          <span class="menu-text">Courses</span>
+       <div class="menu-item">
+        <a href="{% url 'application:receipt_search' %}" class="menu-link">
+          <span class="iconify menu-icon" data-icon="fluent:reciept-24-filled"></span>
+          <span class="menu-text">Reciept</span>
         </a>
       </div>
       <div class="menu-item">
@@ -45,12 +45,12 @@
           <span class="menu-text">Reports</span>
         </a>
       </div>
-      <div class="menu-item">
+      <!-- <div class="menu-item">
         <a href="#" class="menu-link">
           <span class="iconify menu-icon" data-icon="mdi:cog"></span>
           <span class="menu-text">Settings</span>
         </a>
-      </div>
+      </div> -->
     </div>
   </aside>
 
@@ -81,9 +81,13 @@
           <label>Full Name:</label>
           <span>{{ user.get_full_name|default:"Not provided" }}</span>
         </div>
-        <div class="info-item">
+        <!-- <div class="info-item">
           <label>Username:</label>
           <span>{{ user.username }}</span>
+        </div> -->
+        <div class="info-item">
+          <label>Registration Number:</label>
+          <span>{{ user_franchise.registration_number|default:"Not assigned" }}</span>
         </div>
         <div class="info-item">
           <label>Email:</label>

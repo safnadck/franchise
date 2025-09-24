@@ -1,5 +1,4 @@
 
-
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -41,9 +40,9 @@
             </a>
         </div>
         <div class="menu-item">
-        <a href="" class="menu-link">
-          <span class="iconify menu-icon" data-icon="ic:sharp-library-books"></span>
-          <span class="menu-text">Courses</span>
+        <a href="{% url 'application:receipt_search' %}" class="menu-link">
+          <span class="iconify menu-icon" data-icon="fluent:reciept-24-filled"></span>
+          <span class="menu-text">Reciept</span>
         </a>
       </div>
         <div class="menu-item">
@@ -52,12 +51,7 @@
                 <span class="menu-text">Reports</span>
             </a>
         </div>
-        <div class="menu-item">
-            <a href="#" class="menu-link">
-                <span class="iconify menu-icon" data-icon="mdi:cog"></span>
-                <span class="menu-text">Settings</span>
-            </a>
-        </div>
+       
         </div>
     </aside>
 
@@ -77,7 +71,8 @@
         <table class="fee-table">
             <thead>
                 <tr>
-                    <th>Student Username</th>
+                    <th>Name</th>
+                    <th>Reg No</th>
                     <th>Email</th>
                     <th>Phone</th>
                     <th>Franchise</th>
@@ -90,6 +85,7 @@
             <tbody>
                 {% for installment in upcoming_installments %}
                 <tr>
+                    <td>{{ installment.student_fee_management.user_franchise.user.get_full_name }}</td>
                     <td>{{ installment.student_fee_management.user_franchise.user.username }}</td>
                     <td>{{ installment.student_fee_management.user_franchise.user.email }}</td>
                     <td>{% if installment.student_fee_management.user_franchise.user.profile.phone_number %}{{ installment.student_fee_management.user_franchise.user.profile.phone_number }}{% else %}-{% endif %}</td>
@@ -111,7 +107,8 @@
         <table class="fee-table">
             <thead>
                 <tr>
-                    <th>Student Username</th>
+                    <th>Name</th>
+                    <th>Reg No</th>
                     <th>Email</th>
                     <th>Phone</th>
                     <th>Franchise</th>
@@ -125,6 +122,7 @@
             <tbody>
                 {% for item in overdue_data %}
                 <tr>
+                    <td>{{ item.installment.student_fee_management.user_franchise.user.get_full_name }}</td>
                     <td>{{ item.installment.student_fee_management.user_franchise.user.username }}</td>
                     <td>{{ item.installment.student_fee_management.user_franchise.user.email }}</td>
                     <td>{% if item.installment.student_fee_management.user_franchise.user.profile.phone_number %}{{ item.installment.student_fee_management.user_franchise.user.profile.phone_number }}{% else %}-{% endif %}</td>

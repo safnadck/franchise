@@ -1,0 +1,233 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt Details - {{ user_franchise.user.get_full_name }}</title>
+    <link rel="stylesheet" href="{% static 'css/receipt_detail.css' %}">
+    <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
+</head>
+<body>
+    <!-- Navbar -->
+    <header class="navbar">
+        <a href="{% url 'application:homepage' %}" class="navbar-left">
+            <img src="{% static 'images/tutorlogo.png' %}" alt="Tutor Logo" class="brand-logo">
+        </a>
+
+        <div class="user-panel">
+            <span class="iconify profile" data-icon="iconamoon:profile-fill"></span>
+            <span class="user-name">{{ user.username }}</span>
+            <div class="dropdown-menu">
+                <a href="{% url 'logout' %}" class="logout-link">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar -->
+    <aside class="sidebar-menu">
+        <div class="menu-wrapper">
+            <div class="menu-item">
+                <a href="{% url 'application:franchise_list' %}" class="menu-link">
+                    <span class="iconify menu-icon" data-icon="fa-solid:school"></span>
+                    <span class="menu-text">Franchise</span>
+                </a>
+            </div>
+             <div class="menu-item">
+        <a href="{% url 'application:receipt_search' %}" class="menu-link">
+          <span class="iconify menu-icon" data-icon="fluent:reciept-24-filled"></span>
+          <span class="menu-text">Reciept</span>
+        </a>
+      </div>
+            <div class="menu-item">
+                <a href="{% url 'application:homepage' %}" class="menu-link">
+                    <span class="iconify menu-icon" data-icon="iconoir:reports-solid"></span>
+                    <span class="menu-text">Reports</span>
+                </a>
+            </div>
+           
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="page-content">
+        <div class="register-wrapper">
+            <div class="left-buttons">
+                <a href="{% url 'application:receipt_search' %}" class="backbutton">
+                    <span class="iconify" data-icon="weui:back-filled" style="font-size: 20px;"></span>
+                </a>
+            </div>
+        </div>
+
+        <!-- User Information Section -->
+        <div class="user-info-section">
+            <h2>Student Information</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Student Name:</label>
+                    <span>{{ user_franchise.user.get_full_name }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Registration Number:</label>
+                    <span>{{ user_franchise.registration_number }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Email Address:</label>
+                    <span>{{ user_franchise.user.email }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Phone Number:</label>
+                    <span>{{ user_profile.phone_number }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Batch:</label>
+                    <span>{{ user_franchise.batch.batch_no }}</span>
+                </div>
+                <div class="info-item">
+                    <label>Enrollment Status:</label>
+                    <span class="{% if is_enrolled %}enrolled{% else %}not-enrolled{% endif %}">
+                        {% if is_enrolled %}Enrolled{% else %}Not Enrolled{% endif %}
+                    </span>
+                </div>
+            </div>
+
+            <!-- Enrollment Actions -->
+            <div class="enrollment-actions">
+                <form method="post">
+                    {% csrf_token %}
+                    {% if is_enrolled %}
+                        <button type="submit" name="action" value="unenroll" class="unenroll-btn-alt">
+                            <span class="iconify plus-icon" data-icon="vaadin:minus"></span>
+                            Unenroll
+                        </button>
+                    {% else %}
+                        <button type="submit" name="action" value="enroll" class="enroll-btn-alt">
+                            <span class="iconify plus-icon" data-icon="vaadin:plus"></span>
+                            Enroll
+                        </button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+
+        <!-- Payment Form Section -->
+        <div class="payment-section">
+            <h2>Apply Payment</h2>
+            <form class="payment-form" method="post" action="{% url 'application:receipt_detail' user_franchise.id %}">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label" for="payment_amount">Payment Amount</label>
+                    <input
+                        type="number"
+                        step="0.01"
+                        name="payment_amount"
+                        id="payment_amount"
+                        class="form-input"
+                        placeholder="Enter payment amount"
+                        required
+                    >
+                </div>
+                <button type="submit" class="form-button">Apply Payment</button>
+            </form>
+        </div>
+
+        <!-- Print Button Section -->
+    
+
+        <!-- Payment Print Button Section -->
+        <div class="print-section">
+            <button
+                id="payment-print-button"
+                class="print-button payment-print-button"
+                {% if not payment_just_made %}disabled{% endif %}
+                {% if payment_just_made %}data-print-url="{% url 'application:print_payment_detail' user_franchise.id %}"{% endif %}
+                onclick="printPaymentDetails()"
+            >
+                <span class="iconify" data-icon="mdi:printer" style="font-size: 20px; margin-right: 8px;"></span>
+                {% if payment_just_made %}
+                    Print Payment (₹{{ last_payment_amount }})
+                {% else %}
+                    Print Payment (No recent payment)
+                {% endif %}
+            </button>
+
+            
+        </div>
+
+        <!-- Installments Table Section -->
+        <div class="installments-section">
+            <h2>Installment History</h2>
+            <table class="installments-table">
+                <thead>
+                    <tr>
+                        <th>Due Date</th>
+                        <th>Amount</th>
+                        <th>Paid Amount</th>
+                        <th>Remaining Amount</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for installment in installments %}
+                        <tr>
+                            <td>{{ installment.due_date|date:"M d, Y" }}</td>
+                            <td>₹{{ installment.amount }}</td>
+                            <td>₹{{ installment.payed_amount }}</td>
+                            <td>
+                                {% if installment.status == 'paid' %}
+                                    ₹0.00
+                                {% else %}
+                                    ₹{{ installment.remaining_amount|floatformat:2 }}
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="status-badge status-{{ installment.status }}">
+                                    {{ installment.get_status_display }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 2rem;">
+                                No installments found for this student.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+        </div>
+            <div class="print-section">
+            <a href="{% url 'application:print_receipt_detail' user_franchise.id %}" class="print-button" target="_blank">
+                <span class="iconify" data-icon="mdi:printer" style="font-size: 20px; margin-right: 8px;"></span>
+                Print Receipt
+            </a>
+        </div>
+    </main>
+
+    <script>
+        const userPanel = document.querySelector('.user-panel');
+        const dropdownMenu = document.querySelector('.dropdown-menu');
+
+        // Toggle dropdown on click
+        userPanel.addEventListener('click', function(event) {
+            event.stopPropagation();
+            dropdownMenu.style.display = dropdownMenu.style.display === 'block' ? 'none' : 'block';
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function() {
+            dropdownMenu.style.display = 'none';
+        });
+
+        // Function to print payment details
+        function printPaymentDetails() {
+            var button = document.getElementById('payment-print-button');
+            var printUrl = button.getAttribute('data-print-url');
+            if (printUrl) {
+                window.open(printUrl, "_blank");
+            }
+        }
+    </script>
+</body>
+</html>

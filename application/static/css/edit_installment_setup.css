@@ -41,7 +41,7 @@ body {
 }
 
 .user-panel {
-  position: relative; /* Needed for absolute dropdown */
+  position: relative;
   margin-top: 2%;
   display: flex;
   align-items: center;
@@ -52,13 +52,13 @@ body {
   gap: 8px;
   font-size: 14px;
   margin-right: 20px;
-  cursor: pointer; /* shows pointer on hover */
+  cursor: pointer;
 }
 
 .dropdown-menu {
   display: none;
   position: absolute;
-  top: 100%; /* right below user panel */
+  top: 100%;
   right: 0;
   background-color: white;
   border-radius: 10px;
@@ -288,6 +288,7 @@ body {
   font-weight: 600;
 }
 
+/* Perfectly Aligned Table */
 .installment-table {
   width: 100%;
   border-collapse: collapse;
@@ -295,7 +296,7 @@ body {
   border-radius: 14px;
   overflow: hidden;
   margin-bottom: 1rem;
-  table-layout: fixed;
+  table-layout: fixed; /* Ensures consistent column widths */
 }
 
 .installment-table thead {
@@ -305,11 +306,39 @@ body {
 
 .installment-table th,
 .installment-table td {
-  padding: 12px;
+  padding: 10px 12px;
   text-align: left;
   border-bottom: 1px solid #e0e0e0;
   font-size: 14px;
+  vertical-align: middle;
+  padding-left: 60px; /* Consistent left padding */
+}
+
+/* Perfect column width distribution */
+.installment-table th:nth-child(1),
+.installment-table td:nth-child(1) {
   width: 20%;
+}
+
+.installment-table th:nth-child(2),
+.installment-table td:nth-child(2) {
+  width: 15%; /* Repayment Days column */
+}
+
+.installment-table th:nth-child(3),
+.installment-table td:nth-child(3) {
+  width: 25%; /* Due Date column */
+}
+
+.installment-table th:nth-child(4),
+.installment-table td:nth-child(4) {
+  width: 15%; /* Status column */
+}
+
+.installment-table th:nth-child(5),
+.installment-table td:nth-child(5) {
+  width: 25%; /* Delete column */
+  text-align: center;
 }
 
 .installment-table tbody tr {
@@ -320,45 +349,81 @@ body {
   background-color: rgba(254, 255, 115, 0.57);
 }
 
-.installment-table input[type="number"],
-.installment-table input[type="checkbox"] {
-  padding: 8px;
+/* Input field styling for perfect alignment */
+.installment-table input[type="number"] {
+  width: 100%;
+  padding: 8px 10px;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 14px;
+  background-color: white;
+}
+
+.installment-table input[type="number"]:focus {
+  outline: none;
+  border-color: #16376D;
+  box-shadow: 0 0 0 2px rgba(22, 55, 109, 0.1);
+}
+
+/* Ensure text content is properly aligned */
+.installment-table td {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+/* Center align the action buttons */
+.installment-table td:last-child {
+  text-align: center;
 }
 
 .delete-button {
   background-color: #dc3545;
   color: white;
   border: none;
-  padding: 6px 12px;
+  padding: 8px 16px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   transition: background-color 0.3s ease;
+  min-width: 100px;
 }
 
 .delete-button:hover {
   background-color: #b02a37;
+  transform: translateY(-1px);
 }
 
-.installment-table input[type="number"]:focus {
-  outline: none;
-  border-color: #16376D;
+.redo-button {
+  background-color: #ffc107;
+  color: #212529;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background-color 0.3s ease;
+  min-width: 100px;
 }
 
-.installment-table .field-error {
-  border-color: red;
+.redo-button:hover {
+  background-color: #e0a800;
+  transform: translateY(-1px);
 }
 
+/* Form elements styling */
 .form-errors {
-  color: red;
+  color: #dc3545;
   font-size: 12px;
   margin-top: 4px;
+  font-weight: 500;
 }
 
 .errors {
@@ -394,25 +459,32 @@ body {
   text-decoration: none;
   font-weight: 600;
   margin-top: 1rem;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: all 0.3s ease;
 }
 
 .back-link:hover {
   text-decoration: underline;
+  background-color: rgba(22, 55, 109, 0.1);
 }
 
+/* Button styles */
 #add-installment,
 #save-button {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 10px 20px;
+  padding: 12px 24px;
   border-radius: 8px;
   border: none;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: all 0.3s ease;
   margin-right: 10px;
+  min-width: 150px;
 }
 
 #add-installment {
@@ -424,6 +496,7 @@ body {
 #add-installment:hover {
   background-color: #16376D;
   color: white;
+  transform: translateY(-1px);
 }
 
 #save-button {
@@ -433,42 +506,22 @@ body {
 
 #save-button:hover {
   background-color: #218838;
+  transform: translateY(-1px);
 }
 
 #save-button:disabled {
   background-color: #6c757d;
   cursor: not-allowed;
+  transform: none;
 }
 
 .deleted td {
   text-decoration: line-through;
   color: #888;
+  background-color: rgba(108, 117, 125, 0.1);
 }
 
-.deleted {
-  opacity: 0.5;
-}
-
-.redo-button {
-  background-color: #ffc107;
-  color: #212529;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 14px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  transition: background-color 0.3s ease;
-  opacity: 1;
-}
-
-.redo-button:hover {
-  background-color: #e0a800;
-}
-
-/* Responsive */
+/* Responsive design */
 @media screen and (max-width: 768px) {
   .page-content {
     margin-left: 80px;
@@ -485,19 +538,45 @@ body {
 
   .installment-table {
     font-size: 12px;
+    display: block;
+    overflow-x: auto;
   }
 
   .installment-table th,
   .installment-table td {
-    padding: 8px;
+    padding: 8px 10px;
+    white-space: nowrap;
   }
 
   #add-installment,
   #save-button {
-    padding: 8px 16px;
+    padding: 10px 20px;
     font-size: 13px;
+    min-width: 120px;
+  }
+
+  .delete-button,
+  .redo-button {
+    padding: 6px 12px;
+    font-size: 12px;
+    min-width: 80px;
   }
 }
 
-
-
+@media screen and (max-width: 480px) {
+  .installment-table {
+    font-size: 11px;
+  }
+  
+  .installment-table th,
+  .installment-table td {
+    padding: 6px 8px;
+  }
+  
+  #add-installment,
+  #save-button {
+    width: 100%;
+    margin-bottom: 10px;
+    margin-right: 0;
+  }
+}

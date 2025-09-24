@@ -20,4 +20,9 @@ urlpatterns = [
     path('franchise/<int:franchise_pk>/batch/<int:batch_pk>/student-fee-management/<int:user_pk>/print-installment-invoice/<int:installment_pk>/', views.print_installment_invoice, name='print_installment_invoice'),
     path('franchise/<int:franchise_pk>/batch/<int:batch_pk>/student-fee-management/<int:user_pk>/edit-installment/', views.edit_installment_setup, name='edit_installment_setup'),
     path('inactive-users/', views.inactive_users, name='inactive_users'),
+    path('receipt/', views.receipt_search, name='receipt_search'),
+    path('receipt/<int:franchise_id>/', views.receipt_detail, name='receipt_detail'),
+    path('receipt/<int:franchise_id>/print/', views.print_receipt_detail, name='print_receipt_detail'),
+    path('receipt/<int:franchise_id>/print-payment/', views.print_payment_detail, name='print_payment_detail'),
+     path("receipt/api/search/", views.receipt_search_api, name="receipt_search_api"),
 ]

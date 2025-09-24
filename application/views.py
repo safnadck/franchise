@@ -12,6 +12,10 @@ from datetime import timedelta
 from django.utils import timezone
 from django.db import OperationalError, transaction
 from time import sleep
+from django.db.models import Q
+from decimal import Decimal
+from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+
 
 from common.djangoapps.student.models import UserProfile
 
@@ -99,16 +103,28 @@ def inactive_users(request):
         models.Q(last_login__isnull=True) | models.Q(last_login__lt=two_days_ago)
     ).order_by('last_login')
 
+    # Add pagination
+    paginator = Paginator(inactive_users, 20)  # 20 users per page
+    page = request.GET.get('page')
+
+    try:
+        users_page = paginator.page(page)
+    except PageNotAnInteger:
+        users_page = paginator.page(1)
+    except EmptyPage:
+        users_page = paginator.page(paginator.num_pages)
+
+
     # Calculate days since last login for each user
     user_data = []
     now = timezone.now()
-    for user in inactive_users:
+    for user in users_page:
         if user.last_login:
             days_inactive = (now - user.last_login).days
         else:
             days_inactive = None  # Never logged in
 
-        # Try to get phone number from user profile
+        # Get phone number from UserProfile
         try:
             profile = UserProfile.objects.get(user=user)
             phone_number = profile.phone_number
@@ -132,6 +148,7 @@ def inactive_users(request):
     return render(request, 'application/inactive_users.html', {
         'user_data': user_data,
         'two_days_ago': two_days_ago,
+        'users_page': users_page,  # For pagination info
     })
 
 
@@ -339,13 +356,9 @@ def batch_user_register(request, franchise_pk, batch_pk):
     if request.method == "POST":
         form = FranchiseUserRegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save(franchise=franchise, commit=True)
+            user = form.save(franchise=franchise, batch=batch, commit=True)
             CourseEnrollment.enroll(user, batch.course.id)
-            
-            user_franchise = UserFranchise.objects.get(user=user, franchise=franchise)
-            user_franchise.batch = batch
-            user_franchise.save()
-            
+
             return redirect('application:batch_students', franchise_pk=franchise.pk, batch_pk=batch.pk)
     else:
         form = FranchiseUserRegistrationForm()
@@ -372,7 +385,7 @@ def batch_fee_management(request, franchise_pk, batch_pk):
             form = BatchFeeManagementForm(request.POST, instance=fee_management)
             if form.is_valid():
                 form.save()
-            return redirect('application:batch_fee_management', franchise_pk=franchise.pk, batch_pk=batch.pk)
+            return redirect('application:batch_students', franchise_pk=franchise.pk, batch_pk=batch.pk)
 
         elif action == "save_installments":
             InstallmentTemplate.objects.filter(batch_fee_management=fee_management).delete()
@@ -388,7 +401,7 @@ def batch_fee_management(request, franchise_pk, batch_pk):
                         amount=amount,
                         repayment_period_days=period
                     )
-            return redirect('application:batch_fee_management', franchise_pk=franchise.pk, batch_pk=batch.pk)
+            return redirect('application:batch_students', franchise_pk=franchise.pk, batch_pk=batch.pk)
 
     else:
         form = BatchFeeManagementForm(instance=fee_management)
@@ -654,4 +667,318 @@ def print_installment_invoice(request, franchise_pk, batch_pk, user_pk, installm
         'installment': installment,
         'total_paid': total_paid,
         'installment_balance': installment_balance,
+    })
+
+
+@login_required
+@superuser_required
+def receipt_search(request):
+    search_query = request.GET.get('search_query', '').strip()
+    user_franchises = []
+
+    if search_query:
+        user_franchises = UserFranchise.objects.select_related('user', 'batch').filter(
+            Q(registration_number__icontains=search_query) |
+            Q(user__email__icontains=search_query) |
+            Q(user__first_name__icontains=search_query) |
+            Q(user__last_name__icontains=search_query) |
+            Q(user__username__icontains=search_query)
+        )
+
+        from common.djangoapps.student.models import UserProfile
+        user_profiles = UserProfile.objects.filter(phone_number__icontains=search_query)
+        user_ids_from_profile = [up.user_id for up in user_profiles]
+        user_franchises = user_franchises | UserFranchise.objects.filter(user_id__in=user_ids_from_profile)
+        user_franchises = user_franchises.distinct()
+
+    return render(request, 'application/receipt_search.html', {
+        'search_query': search_query,
+        'user_franchises': user_franchises,
+    })
+
+from django.http import JsonResponse
+
+@login_required
+@superuser_required
+def receipt_detail(request, franchise_id):
+    user_franchise = get_object_or_404(UserFranchise, id=franchise_id)
+    from common.djangoapps.student.models import UserProfile
+
+    try:
+        user_profile = UserProfile.objects.get(user=user_franchise.user)
+    except UserProfile.DoesNotExist:
+        user_profile = None
+
+    installments = []
+    try:
+        student_fee = StudentFeeManagement.objects.get(user_franchise=user_franchise)
+        installments = Installment.objects.filter(student_fee_management=student_fee).order_by('due_date')
+
+        # Calculate remaining amount for each installment
+        for installment in installments:
+            if installment.status == 'paid':
+                installment.remaining_amount = 0
+            else:
+                installment.remaining_amount = float(installment.amount) - float(installment.payed_amount)
+
+    except StudentFeeManagement.DoesNotExist:
+        pass
+
+    # Check enrollment status
+    user = user_franchise.user
+    batch = user_franchise.batch
+    course_id = batch.course.id if batch and batch.course else None
+    is_enrolled = False
+    if course_id:
+        is_enrolled = CourseEnrollment.is_enrolled(user, course_id)
+
+    if request.method == 'POST':
+        # Handle enrollment actions first
+        action = request.POST.get('action')
+        if action == 'enroll':
+            if course_id and not CourseEnrollment.is_enrolled(user, course_id):
+                CourseEnrollment.enroll(user, course_id)
+                is_enrolled = True
+            return redirect('application:receipt_detail', franchise_id=franchise_id)
+        elif action == 'unenroll':
+            if course_id and CourseEnrollment.is_enrolled(user, course_id):
+                CourseEnrollment.unenroll(user, course_id)
+                is_enrolled = False
+            return redirect('application:receipt_detail', franchise_id=franchise_id)
+
+        # Handle payment processing
+        payment_amount_str = request.POST.get('payment_amount', '').strip()
+        try:
+            payment_amount = Decimal(payment_amount_str)
+            if payment_amount < 0:
+                raise ValueError
+        except ValueError:
+            messages.error(request, "Invalid payment amount.")
+            return redirect('application:receipt_detail', franchise_id=franchise_id)
+
+        try:
+            student_fee = StudentFeeManagement.objects.get(user_franchise=user_franchise)
+        except StudentFeeManagement.DoesNotExist:
+            messages.error(request, "Student fee management record not found.")
+            return redirect('application:receipt_detail', franchise_id=franchise_id)
+
+        pending_installments = Installment.objects.filter(
+            student_fee_management=student_fee,
+            status__in=['pending', 'overdue']
+        ).order_by('due_date')
+
+        # Track which installments will be affected before processing
+        affected_installments = []
+        remaining_payment = payment_amount
+        for installment in pending_installments:
+            if remaining_payment <= 0:
+                break
+            due = installment.amount - installment.payed_amount
+            if due > 0:
+                add_payment = min(remaining_payment, due)
+                if add_payment > 0:  # Only track if some payment will be added
+                    affected_installments.append(installment.id)
+                remaining_payment -= add_payment
+
+        # Reset remaining_payment for actual processing
+        remaining_payment = payment_amount
+        for installment in pending_installments:
+            if remaining_payment <= 0:
+                break
+            due = installment.amount - installment.payed_amount
+            if due > 0:
+                add_payment = min(remaining_payment, due)
+                installment.payed_amount += add_payment
+                remaining_payment -= add_payment
+                if installment.payed_amount >= installment.amount:
+                    installment.status = 'paid'
+                    if not installment.payment_date:
+                        installment.payment_date = timezone.now().date()
+                installment.save()
+
+        total_paid = sum(inst.payed_amount for inst in Installment.objects.filter(student_fee_management=student_fee))
+        student_fee.remaining_amount = student_fee.batch_fee_management.remaining_amount - total_paid
+        student_fee.save()
+
+        # Track which installments were affected by this payment
+        affected_installments = []
+        for installment in pending_installments:
+            if installment.payed_amount > 0:  # This installment received payment
+                affected_installments.append(installment.id)
+
+        messages.success(request, f"Payment of {payment_amount} applied successfully.")
+        # Set session flag for payment-specific print button AFTER processing
+        request.session['payment_just_made'] = True
+        request.session['last_payment_amount'] = float(payment_amount)
+        request.session['affected_installments'] = affected_installments
+        request.session['payment_date'] = timezone.now().date().isoformat()
+
+        return redirect('application:receipt_detail', franchise_id=franchise_id)
+
+    # Check if payment was just made (for enabling print button)
+    payment_just_made = request.session.get('payment_just_made', False)
+    last_payment_amount = request.session.get('last_payment_amount', 0)
+    affected_installments = request.session.get('affected_installments', [])
+    payment_date_str = request.session.get('payment_date')
+
+    # Convert payment_date back to date object
+    payment_date = timezone.now().date()
+    if payment_date_str:
+        try:
+            from datetime import datetime
+            payment_date = datetime.fromisoformat(payment_date_str).date()
+        except:
+            pass
+
+    # Don't clear session data immediately - let it persist for print functionality
+
+    return render(request, 'application/receipt_detail.html', {
+        'user_franchise': user_franchise,
+        'user_profile': user_profile,
+        'installments': installments,
+        'payment_just_made': payment_just_made,
+        'last_payment_amount': last_payment_amount,
+        'is_enrolled': is_enrolled,
+    })
+
+@login_required
+@superuser_required
+def receipt_search_api(request):
+    query = request.GET.get('q', '').strip()
+    results = []
+
+    if query:
+        user_franchises = UserFranchise.objects.select_related('user', 'batch').filter(
+            Q(registration_number__icontains=query) |
+            Q(user__email__icontains=query) |
+            Q(user__first_name__icontains=query) |
+            Q(user__last_name__icontains=query) |
+            Q(user__username__icontains=query)
+        )
+
+        # also search by phone number
+        user_profiles = UserProfile.objects.filter(phone_number__icontains=query)
+        user_ids_from_profile = [up.user_id for up in user_profiles]
+        user_franchises = user_franchises | UserFranchise.objects.filter(user_id__in=user_ids_from_profile)
+        user_franchises = user_franchises.distinct()[:15]
+
+        # ✅ preload all phone numbers into a dictionary
+        profiles = {
+            p.user_id: p.phone_number
+            for p in UserProfile.objects.filter(user__in=[uf.user for uf in user_franchises])
+        }
+
+        for uf in user_franchises:
+            results.append({
+                "id": uf.id,
+                "registration_number": uf.registration_number,
+                "name": uf.user.get_full_name(),
+                "email": uf.user.email,
+                "phone": profiles.get(uf.user_id, "N/A"),  # fallback to "N/A"
+                "batch": uf.batch.batch_no if uf.batch else "",
+                "detail_url": reverse("application:receipt_detail", args=[uf.id]),
+            })
+
+    return JsonResponse({"results": results})
+
+
+@login_required
+@superuser_required
+def print_receipt_detail(request, franchise_id):
+    user_franchise = get_object_or_404(UserFranchise, id=franchise_id)
+    from common.djangoapps.student.models import UserProfile
+
+    try:
+        user_profile = UserProfile.objects.get(user=user_franchise.user)
+    except UserProfile.DoesNotExist:
+        user_profile = None
+
+    installments = []
+    total_paid = 0
+    total_pending = 0
+    total_amount = 0
+    last_payment_date = None
+
+    try:
+        student_fee = StudentFeeManagement.objects.get(user_franchise=user_franchise)
+        installments = Installment.objects.filter(student_fee_management=student_fee).order_by('due_date')
+
+        # Calculate totals
+        for installment in installments:
+            total_amount += installment.amount
+            if installment.status == 'paid':
+                total_paid += installment.payed_amount
+                if installment.payment_date and (not last_payment_date or installment.payment_date > last_payment_date):
+                    last_payment_date = installment.payment_date
+            else:
+                total_pending += (installment.amount - installment.payed_amount)
+
+    except StudentFeeManagement.DoesNotExist:
+        pass
+
+    return render(request, 'application/print_receipt_detail.html', {
+        'user_franchise': user_franchise,
+        'user_profile': user_profile,
+        'installments': installments,
+        'total_paid': total_paid,
+        'total_pending': total_pending,
+        'total_amount': total_amount,
+        'last_payment_date': last_payment_date,
+    })
+
+
+@login_required
+@superuser_required
+def print_payment_detail(request, franchise_id):
+    """Print only the payment details for recent payments"""
+    user_franchise = get_object_or_404(UserFranchise, id=franchise_id)
+    from common.djangoapps.student.models import UserProfile
+
+    try:
+        user_profile = UserProfile.objects.get(user=user_franchise.user)
+    except UserProfile.DoesNotExist:
+        user_profile = None
+
+    # Get recent payment information from session
+    last_payment_amount = request.session.get('last_payment_amount', 0)
+    affected_installment_ids = request.session.get('affected_installments', [])
+    payment_date_str = request.session.get('payment_date')
+
+    # Convert payment_date back to date object
+    payment_date = timezone.now().date()
+    if payment_date_str:
+        try:
+            from datetime import datetime
+            payment_date = datetime.fromisoformat(payment_date_str).date()
+        except:
+            pass
+
+    # Get student fee information
+    try:
+        student_fee = StudentFeeManagement.objects.get(user_franchise=user_franchise)
+        installments = Installment.objects.filter(student_fee_management=student_fee).order_by('due_date')
+
+        # Get the specific installments that were affected by the recent payment
+        recent_payments = Installment.objects.filter(
+            id__in=affected_installment_ids,
+            student_fee_management=student_fee
+        ).order_by('due_date')
+
+    except StudentFeeManagement.DoesNotExist:
+        installments = []
+        recent_payments = []
+
+    # Clear session data after printing to prevent reuse
+    request.session.pop('payment_just_made', None)
+    request.session.pop('last_payment_amount', None)
+    request.session.pop('affected_installments', None)
+    request.session.pop('payment_date', None)
+
+    return render(request, 'application/print_payment_detail.html', {
+        'user_franchise': user_franchise,
+        'user_profile': user_profile,
+        'last_payment_amount': last_payment_amount,
+        'payment_date': payment_date,
+        'installments': installments,
+        'recent_payments': recent_payments,
     })

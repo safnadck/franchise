@@ -251,7 +251,7 @@ body {
 }
 
 .data-table {
-  text-align: center;
+  text-align: left;
   width: 100%;
   border-collapse: collapse;
 
@@ -263,7 +263,7 @@ body {
 
 .data-table thead th {
   padding: 13px;
-  text-align: center;
+  text-align: left;
   font-size: 15px;
   font-weight: 600;
   white-space: nowrap;
@@ -288,16 +288,18 @@ body {
   padding-left: 40px;
   width: 0%;
   white-space: nowrap;
+  padding-right: 0px;
 }
 
 .data-table td:last-child,
 .data-table th:last-child {
-  text-align: right;
+  text-align: left;
   padding-right: 45px;
 }
 .data-table td:nth-child(2),
 .data-table th:nth-child(2) {
-  text-align: center;
+  text-align: left;
+   padding-right: 40px;
 }
 
 .data-table tbody tr:hover {
@@ -375,6 +377,55 @@ body {
   color: #333;
   font-size: 1rem;
   font-weight: 500;
+}
+
+/* Pagination Styles */
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+  padding: 1rem;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: white;
+  padding: 0.75rem 1rem;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.pagination-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 20px;
+  text-decoration: none;
+  color: #16376D;
+  background-color: #fff;
+  border: 1px solid #16376D;
+  border-radius: 14px;
+  font-weight: 600;
+  font-size: 15px;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  min-width: 40px;
+}
+
+.pagination-link:hover {
+  background-color: #16376D;
+  color: #fff;
+}
+
+.pagination-info {
+  padding: 10px 20px;
+  color: #16376D;
+  font-weight: 600;
+  font-size: 15px;
+  white-space: nowrap;
+  background-color: rgba(22, 55, 109, 0.1);
+  border-radius: 14px;
 }
 
 /* Responsive */

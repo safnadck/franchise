@@ -18,7 +18,7 @@
 
     <div class="user-panel">
         <span class="iconify profile" data-icon="iconamoon:profile-fill"></span>
-        <span class="user-name">{{ user.username }}</span>
+        <span class="user-name">Admin</span>
 
         <div class="dropdown-menu">
             <a href="{% url 'logout' %}" class="logout-link">Logout</a>
@@ -35,23 +35,23 @@
             </a>
         </div>
         <div class="menu-item">
-            <a href="" class="menu-link">
-                <span class="iconify menu-icon" data-icon="ic:sharp-library-books"></span>
-                <span class="menu-text">Courses</span>
-            </a>
-        </div>
+        <a href="{% url 'application:receipt_search' %}" class="menu-link">
+          <span class="iconify menu-icon" data-icon="fluent:reciept-24-filled"></span>
+          <span class="menu-text">Reciept</span>
+        </a>
+      </div>
         <div class="menu-item">
             <a href="{% url 'application:homepage' %}" class="menu-link">
                 <span class="iconify menu-icon" data-icon="iconoir:reports-solid"></span>
                 <span class="menu-text">Reports</span>
             </a>
         </div>
-        <div class="menu-item">
+        <!-- <div class="menu-item">
             <a href="#" class="menu-link">
                 <span class="iconify menu-icon" data-icon="mdi:cog"></span>
                 <span class="menu-text">Settings</span>
             </a>
-        </div>
+        </div> -->
     </div>
 </aside>
 
@@ -116,62 +116,77 @@
                     </tr>
                 </thead>
                 <tbody id="installment-tbody">
-                    {% for form in formset %}
-                        <tr class="installment-row">
-                            <td>
-                                {{ form.id }}
-                                {{ form.amount }}
-                                {% if form.amount.errors %}
-                                    <div class="form-errors">
-                                        {% for error in form.amount.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {{ form.repayment_period_days }}
-                                {% if form.repayment_period_days.errors %}
-                                    <div class="form-errors">
-                                        {% for error in form.repayment_period_days.errors %}
-                                            {{ error }}
-                                        {% endfor %}
-                                    </div>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {% if form.instance.due_date %}
-                                    {{ form.instance.due_date }}
-                                {% else %}
-                                    <em>Will be calculated after save</em>
-                                {% endif %}
-                            </td>
-                            <td>
-                                {{ form.instance.get_status_display|default:"Pending" }}
-                            </td>
-                            <td style="text-align: center;">
-                                <input type="hidden" name="{{ form.DELETE.html_name }}" value="">
-                                <button type="button" class="delete-button" data-row-id="{{ form.instance.id|default:forloop.counter }}">
-                                    <span class="iconify" data-icon="mdi:delete" style="font-size: 16px;"></span>
-                                    Delete
-                                </button>
-                                <button type="button" class="redo-button" data-row-id="{{ form.instance.id|default:forloop.counter }}" style="display:none;">
-                                    <span class="iconify" data-icon="mdi:redo" style="font-size: 16px;"></span>
-                                    Redo
-                                </button>
-                            </td>
-                        </tr>
-                        {% if form.non_field_errors %}
-                            <tr>
-                                <td colspan="5" class="errors">
-                                    {% for error in form.non_field_errors %}
-                                        {{ error }}
-                                    {% endfor %}
-                                </td>
-                            </tr>
-                        {% endif %}
+    {% for form in formset %}
+        <tr class="installment-row">
+            <td>
+                {{ form.id }}
+                {% if form.instance.status == "paid" %}
+                    <span>{{ form.instance.amount }}</span>
+                    <input type="hidden" name="{{ form.amount.html_name }}" value="{{ form.instance.amount }}">
+                {% else %}
+                    {{ form.amount }}
+                {% endif %}
+                {% if form.amount.errors %}
+                    <div class="form-errors">
+                        {% for error in form.amount.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </td>
+            <td>
+                {% if form.instance.status == "paid" %}
+                    <span>{{ form.instance.repayment_period_days }}</span>
+                    <input type="hidden" name="{{ form.repayment_period_days.html_name }}" value="{{ form.instance.repayment_period_days }}">
+                {% else %}
+                    {{ form.repayment_period_days }}
+                {% endif %}
+                {% if form.repayment_period_days.errors %}
+                    <div class="form-errors">
+                        {% for error in form.repayment_period_days.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </td>
+            <td>
+                {% if form.instance.due_date %}
+                    {{ form.instance.due_date }}
+                {% else %}
+                    <em>Will be calculated after save</em>
+                {% endif %}
+            </td>
+            <td>
+                {{ form.instance.get_status_display|default:"Pending" }}
+            </td>
+            <td style="text-align: center;">
+                {% if form.instance.status == "paid" %}
+                    <em>Locked</em>
+                {% else %}
+                    <input type="hidden" name="{{ form.DELETE.html_name }}" value="">
+                    <button type="button" class="delete-button" data-row-id="{{ form.instance.id|default:forloop.counter }}">
+                        <span class="iconify" data-icon="mdi:delete" style="font-size: 16px;"></span>
+                        Delete
+                    </button>
+                    <button type="button" class="redo-button" data-row-id="{{ form.instance.id|default:forloop.counter }}" style="display:none;">
+                        <span class="iconify" data-icon="mdi:redo" style="font-size: 16px;"></span>
+                        Redo
+                    </button>
+                {% endif %}
+            </td>
+        </tr>
+        {% if form.non_field_errors %}
+            <tr>
+                <td colspan="5" class="errors">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
                     {% endfor %}
-                </tbody>
+                </td>
+            </tr>
+        {% endif %}
+    {% endfor %}
+</tbody>
+
             </table>
 
             <div style="margin: 25px 0;">

@@ -18,6 +18,35 @@ class UserFranchise(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     franchise = models.ForeignKey(Franchise, on_delete=models.SET_NULL, null=True, blank=True)
     batch = models.ForeignKey("Batch", on_delete=models.SET_NULL, null=True, blank=True)
+    registration_number = models.CharField(max_length=20, unique=True, blank=True, null=True)
+
+    def generate_registration_number(self):
+        if not self.franchise or not self.batch:
+            return None
+
+        # Franchise number: franchise.id zero-padded to 3 digits
+        franchise_num = f"{self.franchise.id:03d}"
+
+        # Batch number: order of batch within franchise, zero-padded to 3 digits
+        batch_order = Batch.objects.filter(
+            franchise=self.franchise,
+            id__lte=self.batch.id
+        ).count()
+        batch_num = f"{batch_order:03d}"
+
+        # Student number: count of students in this franchise and batch + 1, zero-padded to 4 digits
+        student_count = UserFranchise.objects.filter(
+            franchise=self.franchise,
+            batch=self.batch
+        ).exclude(registration_number__isnull=True).count() + 1
+        student_num = f"{student_count:04d}"
+
+        return f"AT-{franchise_num}-{batch_num}-{student_num}"
+
+    def save(self, *args, **kwargs):
+        if not self.registration_number:
+            self.registration_number = self.generate_registration_number()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         franchise_name = self.franchise.name if self.franchise else "No Franchise"

@@ -36,7 +36,7 @@ class FranchiseUserRegistrationForm(forms.ModelForm):
             raise forms.ValidationError("Email already exists")
         return email
 
-    def save(self, franchise=None, commit=True):
+    def save(self, franchise=None, batch=None, commit=True):
         user = super().save(commit=False)
         name_parts = self.cleaned_data['full_name'].split(' ', 1)
         user.first_name = name_parts[0]
@@ -55,9 +55,21 @@ class FranchiseUserRegistrationForm(forms.ModelForm):
 
             if franchise:
                 from .models import UserFranchise
-                UserFranchise.objects.create(user=user, franchise=franchise)
+                user_franchise = UserFranchise(user=user, franchise=franchise)
+                if batch:
+                    user_franchise.batch = batch
+                user_franchise.save()
+                # Set username to registration_number after it's generated
+                user.username = user_franchise.registration_number
+                user.save()
 
         return user
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Set a default username that will be overridden
+        if not self.instance.pk:
+            self.fields['username'].initial = 'temp_username'
 
 
 class BatchForm(forms.ModelForm):
@@ -149,9 +161,13 @@ class StudentEditForm(forms.ModelForm):
     mailing_address = forms.CharField(max_length=255, label='Mailing Address', required=False)
     new_password = forms.CharField(widget=forms.PasswordInput(attrs={'id': 'new_password'}), required=False, label='New Password')
 
+
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name', 'email']
+        widgets = {
+            'username': forms.TextInput(attrs={'readonly': 'readonly', 'title': 'Username is automatically set to registration number'}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -171,3 +187,12 @@ class StudentEditForm(forms.ModelForm):
                 user.set_password(new_password)
                 user.save()
         return user
+
+
+class UserSearchForm(forms.Form):
+    search_query = forms.CharField(
+        max_length=100,
+        required=False,
+        label='Search',
+        widget=forms.TextInput(attrs={'placeholder': 'Enter registration number, email, phone, or name'})
+    )

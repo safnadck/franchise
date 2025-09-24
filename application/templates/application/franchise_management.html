@@ -5,7 +5,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Home Page</title>
+  <title>franchise management</title>
   <link rel="stylesheet" href="{% static 'css/franchise_management.css' %}">
   <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
   </style>
@@ -40,8 +40,11 @@
           <span class="menu-text">Franchise</span>
         </a>
       </div>
-      <div class="menu-item">
-      
+       <div class="menu-item">
+        <a href="{% url 'application:receipt_search' %}" class="menu-link">
+          <span class="iconify menu-icon" data-icon="fluent:reciept-24-filled"></span>
+          <span class="menu-text">Reciept</span>
+        </a>
       </div>
       <div class="menu-item">
         <a href="{% url 'application:homepage' %}" class="menu-link">
@@ -49,12 +52,7 @@
           <span class="menu-text">Reports</span>
         </a>
       </div>
-      <div class="menu-item">
-        <a href="#" class="menu-link">
-          <span class="iconify menu-icon" data-icon="mdi:cog"></span>
-          <span class="menu-text">Settings</span>
-        </a>
-      </div>
+      
     </div>
   </aside>
 

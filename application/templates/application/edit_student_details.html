@@ -34,9 +34,9 @@
         </a>
       </div>
       <div class="menu-item">
-        <a href="" class="menu-link">
-          <span class="iconify menu-icon" data-icon="ic:sharp-library-books"></span>
-          <span class="menu-text">Courses</span>
+        <a href="{% url 'application:receipt_search' %}" class="menu-link">
+          <span class="iconify menu-icon" data-icon="fluent:reciept-24-filled"></span>
+          <span class="menu-text">Reciept</span>
         </a>
       </div>
       <div class="menu-item">
@@ -45,12 +45,12 @@
           <span class="menu-text">Reports</span>
         </a>
       </div>
-      <div class="menu-item">
+      <!-- <div class="menu-item">
         <a href="#" class="menu-link">
           <span class="iconify menu-icon" data-icon="mdi:cog"></span>
           <span class="menu-text">Settings</span>
         </a>
-      </div>
+      </div> -->
     </div>
   </aside>
 
@@ -73,6 +73,7 @@
         <div class="form-group">
           {{ form.username.label_tag }}
           {{ form.username }}
+          <small class="form-help">Username is automatically set to the registration number and cannot be changed.</small>
           {% if form.username.errors %}
           <div class="error">{{ form.username.errors }}</div>
           {% endif %}

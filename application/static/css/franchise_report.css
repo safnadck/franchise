@@ -298,9 +298,10 @@ body {
 .data-table td:nth-child(2),
 .data-table th:nth-child(2) {
   width: 25%;
-  padding-right: 500px;
+  padding-right: 20rem; /* small padding instead of huge fixed value */
   text-align: center;
 }
+
 
 .data-table tbody tr:hover {
   background-color: rgba(254, 255, 115, 0.57);
@@ -407,5 +408,7 @@ body {
   .franchise-title {
     font-size: 1.25rem;
   }
+
+  
 }
 

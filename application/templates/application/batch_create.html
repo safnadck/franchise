@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Register Franchise</title>
+    <title>Register Batch</title>
     <link rel="stylesheet" href="{% static 'css/batch_create.css' %}">
     <script src="https://code.iconify.design/3/3.1.0/iconify.min.js"></script>
 </head>
@@ -36,9 +36,9 @@
         </a>
       </div>
       <div class="menu-item">
-        <a href="" class="menu-link">
-          <span class="iconify menu-icon" data-icon="ic:sharp-library-books"></span>
-          <span class="menu-text">Courses</span>
+        <a href="{% url 'application:receipt_search' %}" class="menu-link">
+          <span class="iconify menu-icon" data-icon="fluent:reciept-24-filled"></span>
+          <span class="menu-text">Reciept</span>
         </a>
       </div>
       <div class="menu-item">
@@ -47,12 +47,12 @@
           <span class="menu-text">Reports</span>
         </a>
       </div>
-      <div class="menu-item">
+      <!-- <div class="menu-item">
         <a href="#" class="menu-link">
           <span class="iconify menu-icon" data-icon="mdi:cog"></span>
           <span class="menu-text">Settings</span>
         </a>
-      </div>
+      </div> -->
     </div>
   </aside>
 

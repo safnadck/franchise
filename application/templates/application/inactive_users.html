@@ -40,24 +40,19 @@
       <div class="menu-item">
 
       </div>
+       <div class="menu-item">
+        <a href="{% url 'application:receipt_search' %}" class="menu-link">
+          <span class="iconify menu-icon" data-icon="fluent:reciept-24-filled"></span>
+          <span class="menu-text">Reciept</span>
+        </a>
+      </div>
       <div class="menu-item">
         <a href="{% url 'application:homepage' %}" class="menu-link">
           <span class="iconify menu-icon" data-icon="iconoir:reports-solid"></span>
           <span class="menu-text">Reports</span>
         </a>
       </div>
-      <div class="menu-item">
-        <a href="{% url 'application:inactive_users' %}" class="menu-link active">
-          <span class="iconify menu-icon" data-icon="mdi:account-off"></span>
-          <span class="menu-text">Inactive Users</span>
-        </a>
-      </div>
-      <div class="menu-item">
-        <a href="#" class="menu-link">
-          <span class="iconify menu-icon" data-icon="mdi:cog"></span>
-          <span class="menu-text">Settings</span>
-        </a>
-      </div>
+       
     </div>
   </aside>
 
@@ -79,6 +74,7 @@
         <thead>
           <tr>
             <th>Username</th>
+            <th>Name</th>
             <th>Email</th>
             <th>Phone Number</th>
             <th>Last Login</th>
@@ -91,6 +87,7 @@
           {% for data in user_data %}
           <tr>
             <td>{{ data.user.username }}</td>
+            <td>{{ data.user.get_full_name|default:"N/A" }}</td>
             <td>{{ data.user.email }}</td>
             <td>
               {% if data.phone_number %}
@@ -130,11 +127,32 @@
           </tr>
           {% empty %}
           <tr>
-            <td colspan="7">No inactive users found.</td>
+            <td colspan="8">No inactive users found.</td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
+
+      <!-- Pagination Controls -->
+      {% if users_page.has_other_pages %}
+      <div class="pagination-wrapper">
+        <div class="pagination">
+          {% if users_page.has_previous %}
+            <a href="?page=1" class="pagination-link">&laquo; First</a>
+            <a href="?page={{ users_page.previous_page_number }}" class="pagination-link">&lsaquo; Previous</a>
+          {% endif %}
+
+          <span class="pagination-info">
+            Page {{ users_page.number }} of {{ users_page.paginator.num_pages }}
+          </span>
+
+          {% if users_page.has_next %}
+            <a href="?page={{ users_page.next_page_number }}" class="pagination-link">Next &rsaquo;</a>
+            <a href="?page={{ users_page.paginator.num_pages }}" class="pagination-link">Last &raquo;</a>
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
     </div>
   </main>
 

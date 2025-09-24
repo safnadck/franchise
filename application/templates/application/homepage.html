@@ -38,10 +38,10 @@
           <span class="menu-text">Franchise</span>
         </a>
       </div>
-      <div class="menu-item">
-        <a href="" class="menu-link">
-          <span class="iconify menu-icon" data-icon="ic:sharp-library-books"></span>
-          <span class="menu-text">Courses</span>
+     <div class="menu-item">
+        <a href="{% url 'application:receipt_search' %}" class="menu-link">
+          <span class="iconify menu-icon" data-icon="fluent:reciept-24-filled"></span>
+          <span class="menu-text">Reciept</span>
         </a>
       </div>
       <div class="menu-item">
@@ -50,13 +50,15 @@
           <span class="menu-text">Reports</span>
         </a>
       </div>
+
       
-      <div class="menu-item">
+      
+      <!-- <div class="menu-item">
         <a href="#" class="menu-link">
           <span class="iconify menu-icon" data-icon="mdi:cog"></span>
           <span class="menu-text">Settings</span>
         </a>
-      </div>
+      </div> -->
     </div>
   </aside>
 
@@ -68,18 +70,20 @@
      <div class="content">
             <p>Welcome to the Franchise Management System. Here you can manage franchises, students, and courses.</p>
 <div class="stats">
-    <div class="stat-box">
-        <i class="fas fa-user-graduate"></i>
-        <h2>{{ total_students }}</h2>
-        <p>Total Students</p>
-    </div>
-    <a href="{% url 'application:franchise_list' %}" class="stat-box-link">
+
+  <a href="{% url 'application:franchise_list' %}" class="stat-box-link">
         <div class="stat-box">
             <i class="fas fa-store"></i>
             <h2>{{ total_franchises }}</h2>
             <p>Total Franchises</p>
         </div>
     </a>
+    <div class="stat-box">
+        <i class="fas fa-user-graduate"></i>
+        <h2>{{ total_students }}</h2>
+        <p>Total Students</p>
+    </div>
+   
 
 
      <a href="{% url 'application:inactive_users' %}" class="stat-box-link">
@@ -110,40 +114,8 @@
 
 
 
-     <div class="chart-container">
-    <canvas id="statsChart"></canvas>
-</div>
 
-    <!-- <div class="table-wrapper">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Location</th>
-            <th>Person Responsible</th>
-            <th>Contact</th>
-            <th>Email ID</th>
-            <th>Reg Date</th>
-          </tr>
-        </thead>
-        <tbody>
-                    {% for franchise in franchises %}
-                        <tr>
-                            <td>{{ franchise.name }}</td>
-                            <td>{{ franchise.address }}</td>
-                            <td>{{ franchise.person_responsible }}</td>
-                            <td>{{ franchise.contact_no }}</td>
-                            <td>{{ franchise.email }}</td>
-                            <td>{{ franchise.registration_date }}</td>
-                        </tr>
-                    {% empty %}
-                        <tr>
-                            <td colspan="6">No franchises registered yet.</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-      </table>
-    </div> -->
+
   </main>
 
 
@@ -151,33 +123,6 @@
 
 
 
-
-
-  <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-    const ctx = document.getElementById('statsChart').getContext('2d');
-    const statsChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: ['Students', 'Franchises'],
-            datasets: [{
-                label: 'Count',
-                data: [
-                    Number('{{ total_students }}'),
-                    Number('{{ total_franchises }}')
-                ],
-                backgroundColor: ['#3498db', '#e67e22'],
-                borderWidth: 1
-            }]
-        },
-        options: {
-            responsive: true,
-            scales: {
-                y: { beginAtZero: true }
-            }
-        }
-    });
-</script> -->
 
 <script>
   const userPanel = document.querySelector('.user-panel');
